@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/djaymore/ableStyle#readme",
   "dependencies": {
+    "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "gulp": "^3.9.1",
-    "gulp-nodemon": "^2.2.1"
+    "gulp-nodemon": "^2.2.1",
+    "mongoose": "^4.13.7"
   }
 }
