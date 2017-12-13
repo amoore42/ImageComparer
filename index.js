@@ -1,7 +1,8 @@
 var express = require('express'),
     mongoose = require('mongoose'),
     bodyParser = require('body-parser'),
-    AWS = require('aws-sdk');
+    AWS = require('aws-sdk'),
+    dotenv = require('dotenv').config();
 
 var options = {
     useMongoClient: true,
