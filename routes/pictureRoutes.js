@@ -1,13 +1,37 @@
 var express = require('express');
+var S3 = require('../ablemodules/S3Module');
 
 var routes = function(Picture){
     var pictureRouter = express.Router();
     
     pictureRouter.route('/')
         .post(function(req, res){
-            var picture = new Picture(req.body);
-            picture.save();
-            res.status(201).send(picture);
+            //We want to get the image from s3 and then create an image hash
+            S3.getImage(req.body.Uri, function(hash){
+                var picture = new Picture();
+                picture.Uri = req.body.Uri;
+                picture.Hash = hash;
+
+                //Now we need to check the mongodb to see if any image hashes are close
+                var query = {};
+                query.Hash = hash;
+                Picture.findOne(query, function(err, mongoPicture){
+                    if(err)
+                        res.status(500).send(err);
+                    else{
+                        if(mongoPicture === null){
+                            picture.save();
+                            res.json(picture);
+                        }
+                        else{
+                            res.json(picture);
+                            console.log("Picture already exists in the db");
+                        }
+                    }
+                });
+            });
+
+            res.status(201);
         })
         .get(function(req, res){
             var query = {};

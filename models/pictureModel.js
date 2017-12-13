@@ -2,12 +2,11 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var pictureModel = new Schema({
-    name:{
+    Uri:{
         type: String
     },
-    image:{
-        type: Array, 
-        default: []
+    Hash:{
+        type: String
     }
 });
 
