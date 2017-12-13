@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/djaymore/ableStyle#readme",
   "dependencies": {
+    "aws-sdk": "^2.168.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "gulp": "^3.9.1",
