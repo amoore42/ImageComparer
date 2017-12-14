@@ -7,7 +7,6 @@ var routes = function(Picture){
     pictureRouter.route('/')
         .post(function(req, res){
             //We want to get the image from s3 and then create an image hash
-            //var uri = req.body.uri;
             var picture = new Picture(req.body);
             S3.getImage(picture.Uri, function(hash){
                 var picture = new Picture();
