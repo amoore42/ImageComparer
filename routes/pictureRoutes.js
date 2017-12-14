@@ -7,7 +7,9 @@ var routes = function(Picture){
     pictureRouter.route('/')
         .post(function(req, res){
             //We want to get the image from s3 and then create an image hash
-            S3.getImage(req.body.Uri, function(hash){
+            //var uri = req.body.uri;
+            var picture = new Picture(req.body);
+            S3.getImage(picture.Uri, function(hash){
                 var picture = new Picture();
                 picture.Uri = req.body.Uri;
                 picture.Hash = hash;
@@ -24,7 +26,7 @@ var routes = function(Picture){
                             res.json(picture);
                         }
                         else{
-                            res.json(picture);
+                            res.status(401).send("Picture already exists in the db");
                             console.log("Picture already exists in the db");
                         }
                     }

@@ -1,6 +1,6 @@
 var express = require('express'),
     mongoose = require('mongoose'),
-    bodyParser = require('body-parser'),
+    bodyParser = require('body-parser');
     AWS = require('aws-sdk'),
     dotenv = require('dotenv').config();
 
@@ -35,6 +35,3 @@ app.get('/', function(req, res){
 app.listen(port, function(){
     console.log('Gulp is running my app on port: ' + port)
 });
-
-//var S3 = require('./ablemodules/S3Module');
-//S3.getImage("587271d6bd966f1100025926.jpeg");

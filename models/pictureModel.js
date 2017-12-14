@@ -6,7 +6,8 @@ var pictureModel = new Schema({
         type: String
     },
     Hash:{
-        type: String
+        type: String,
+        default: '',
     }
 });
 

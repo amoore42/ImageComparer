@@ -1,17 +1,18 @@
 var AWS = require('aws-sdk');
 
+var accesskey = process.env.AccessKeyId;
+var secretkey = process.env.SecretAccessKey;
+
 AWS.config.update({
-    accessKeyId: process.env.AccessKeyId,
-    secretAccessKey: process.env.SecretAccessKey
+    accessKeyId: accesskey,
+    secretAccessKey: secretkey
 });
 
 var S3 = function(){
-    //var image = require('../Image');
     var JIMP = require('./jimpModule');
     var s3 = new AWS.S3();
     var s3Params = {
         Bucket: 'twt-product-images-usstandard',
-        //Key: 'inspiration/587271d6bd966f1100025926.jpeg'
     };
 
     function getImagePrivate( strId, callback ) {
