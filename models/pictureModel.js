@@ -2,6 +2,9 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var pictureModel = new Schema({
+    UserName:{
+      type: String  
+    },
     Uri:{
         type: String
     },

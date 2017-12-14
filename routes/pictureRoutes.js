@@ -1,5 +1,6 @@
 var express = require('express');
 var S3 = require('../ablemodules/S3Module');
+var dataLoader = require("../ablemodules/dataLoader");
 
 var routes = function(Picture){
     var pictureRouter = express.Router();
@@ -7,32 +8,68 @@ var routes = function(Picture){
     pictureRouter.route('/')
         .post(function(req, res){
             //We want to get the image from s3 and then create an image hash
-            var picture = new Picture(req.body);
-            S3.getImage(picture.Uri, function(hash){
+            var returnValues = new Array();
+            var postedPicture = new Picture(req.body);
+            S3.getImage(postedPicture.Uri, function(hash){
                 var picture = new Picture();
                 picture.Uri = req.body.Uri;
                 picture.Hash = hash;
+                picture.UserName = postedPicture.UserName;
 
-                //Now we need to check the mongodb to see if any image hashes are close
-                var query = {};
-                query.Hash = hash;
-                Picture.findOne(query, function(err, mongoPicture){
-                    if(err)
-                        res.status(500).send(err);
-                    else{
-                        if(mongoPicture === null){
-                            picture.save();
-                            res.json(picture);
-                        }
-                        else{
-                            res.status(401).send("Picture already exists in the db");
-                            console.log("Picture already exists in the db");
-                        }
+                //Find the hash in the vpTree and close matches
+                var maximumDistance = 2;
+                var matches = dataLoader.getMatches(hash, maximumDistance);
+
+                //Nothing was found
+                if(matches.values.length == 0 && matches.hash == null){
+                    picture.save();
+                    returnValues.push(picture);
+                    res.json(returnValues);
+                }else{
+                    //check for exact match first - if there is an exact match just return
+                    //what was passed in.  Don't save it though
+                    if(matches.hash != null){
+                        returnValues.push(picture);
+                        var query = {};
+                        query.Hash = matches.hash;
+                        Picture.findOne(query, function(err, mongoPicture){
+                            if(err)
+                                res.status(500).send(err);
+                            else{
+                                //Fill in the details returned from mongo
+                                returnPicture.UserName = mongoPicture.UserName;
+                                returnPicture.Uri = mongoPicture.Uri;
+                                returnValues.push(returnPicture);
+                                if(matches.values.length <= 0)
+                                    res.json(returnValues);
+                            }
+                        });
                     }
-                });
-            });
+                    
+                    //Get data from mongo for the other close matches
+                    for(var i = 0; i < matches.values.length; ++i){
+                        var closeMatch = matches.values[i];
+                        var returnPicture = new Picture();
+                        returnPicture.Hash = closeMatch;
 
-            res.status(201);
+                        var query = {};
+                        query.Hash = closeMatch;
+                        Picture.findOne(query, function(err, mongoPicture){
+                            if(err)
+                                res.status(500).send(err);
+                            else{
+                                //Fill in the details returned from mongo
+                                returnPicture.UserName = mongoPicture.UserName;
+                                returnPicture.Uri = mongoPicture.Uri;
+                                returnValues.push(returnPicture);
+                                res.json(returnValues);
+                            }
+                        });
+                    }
+                }
+            });
+            
+            res.json(returnValues);
         })
         .get(function(req, res){
             var query = {};
