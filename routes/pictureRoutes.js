@@ -29,7 +29,7 @@ var routes = function(Picture){
                 picture.UserName = postedPicture.UserName;
 
                 //Find the hash in the vpTree and close matches
-                var maximumDistance = 2;
+                var maximumDistance = 0;
                 var matches = dataLoader.getMatches(hash, maximumDistance);
 
                 //Nothing was found

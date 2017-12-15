@@ -35,8 +35,10 @@ var dataLoader = {
         var searchResult = vptreehash.search(hash, 2, 5);
         var result = new Array();
 
-        for(var i = 0; i < searchResult.length; ++i){
-            result.push(vptreehash.S[i]);
+        if(searchResult[i].d <= maximumDistance){
+            for(var i = 0; i < searchResult.length; ++i){
+                result.push(vptreehash.S[i]);
+            }
         }
         
         return result;
