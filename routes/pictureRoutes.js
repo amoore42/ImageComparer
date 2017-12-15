@@ -1,6 +1,17 @@
 var express = require('express');
 var S3 = require('../ablemodules/S3Module');
 var dataLoader = require("../ablemodules/dataLoader");
+var mongoose = require('mongoose');
+
+Array.prototype.contains = function(obj) {
+    var i = this.length;
+    while (i--) {
+        if (this[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
 
 var routes = function(Picture){
     var pictureRouter = express.Router();
@@ -21,55 +32,29 @@ var routes = function(Picture){
                 var matches = dataLoader.getMatches(hash, maximumDistance);
 
                 //Nothing was found
-                if(matches.values.length == 0 && matches.hash == null){
+                if(matches.length == 0){
                     picture.save();
                     returnValues.push(picture);
                     res.json(returnValues);
                 }else{
-                    //check for exact match first - if there is an exact match just return
-                    //what was passed in.  Don't save it though
-                    if(matches.hash != null){
-                        returnValues.push(picture);
-                        var query = {};
-                        query.Hash = matches.hash;
-                        Picture.findOne(query, function(err, mongoPicture){
-                            if(err)
-                                res.status(500).send(err);
-                            else{
-                                //Fill in the details returned from mongo
-                                returnPicture.UserName = mongoPicture.UserName;
-                                returnPicture.Uri = mongoPicture.Uri;
-                                returnValues.push(returnPicture);
-                                if(matches.values.length <= 0)
-                                    res.json(returnValues);
-                            }
-                        });
-                    }
-                    
-                    //Get data from mongo for the other close matches
-                    for(var i = 0; i < matches.values.length; ++i){
-                        var closeMatch = matches.values[i];
-                        var returnPicture = new Picture();
-                        returnPicture.Hash = closeMatch;
 
-                        var query = {};
-                        query.Hash = closeMatch;
-                        Picture.findOne(query, function(err, mongoPicture){
-                            if(err)
-                                res.status(500).send(err);
-                            else{
-                                //Fill in the details returned from mongo
-                                returnPicture.UserName = mongoPicture.UserName;
-                                returnPicture.Uri = mongoPicture.Uri;
-                                returnValues.push(returnPicture);
-                                res.json(returnValues);
-                            }
-                        });
+                    //If an exact match is not in the db then add it 
+                    var index = matches.indexOf(hash);
+                    if(index == -1){
+                        returnValues.push(picture);
+                        picture.save();
                     }
+
+                    Picture.find({
+                        'Hash': { $in: matches }
+                    }, function(err, docs){
+                         for(var i = 0; i < docs.length; ++i){
+                            returnValues.push(docs[i]);
+                         }
+                         res.json(returnValues);
+                    });
                 }
             });
-            
-            res.json(returnValues);
         })
         .get(function(req, res){
             var query = {};

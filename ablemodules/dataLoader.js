@@ -33,17 +33,10 @@ var dataLoader = {
     getMatches: function(hash, maximumDistance){
         //The two signifies the number of closest elements.  5 is the distance/tolerance
         var searchResult = vptreehash.search(hash, 2, 5);
-        var result = new ResultSet(null, new Array());
+        var result = new Array();
 
         for(var i = 0; i < searchResult.length; ++i){
-            if(searchResult[i].d <= maximumDistance){
-                if(searchResult[i].d == 0)
-                    result.hash = hash;
-                else{
-                    var data = new ResultSet(hash);
-                    result.values.push(hash);
-                }
-            }
+            result.push(vptreehash.S[i]);
         }
         
         return result;
