@@ -2,6 +2,7 @@ var express = require('express');
 var S3 = require('../ablemodules/S3Module');
 var dataLoader = require("../ablemodules/dataLoader");
 var mongoose = require('mongoose');
+var Picture = require('../models/pictureModel');
 
 Array.prototype.contains = function(obj) {
     var i = this.length;
@@ -33,7 +34,12 @@ var routes = function(Picture){
 
                 //Nothing was found
                 if(matches.length == 0){
-                    picture.save();
+                    picture.save(function(err){
+                        if(!err){
+                            //reload the tree.  There is no method to just insert a record *yet
+                            dataLoader.loadAllPictures();
+                        }
+                    });
                     returnValues.push(picture);
                     res.json(returnValues);
                 }else{
@@ -42,7 +48,10 @@ var routes = function(Picture){
                     var index = matches.indexOf(hash);
                     if(index == -1){
                         returnValues.push(picture);
-                        picture.save();
+                        picture.save(function(err){
+                            if(!err)
+                                dataLoader.loadAllPictures();
+                        });
                     }
 
                     Picture.find({
