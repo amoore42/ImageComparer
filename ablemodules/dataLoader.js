@@ -38,7 +38,7 @@ var dataLoader = {
         
         for(var i = 0; i < searchResult.length; ++i){
             if(searchResult[i].d <= maximumDistance){
-                result.push(vptreehash.S[i]);
+                result.push(vptreehash.S[searchResult[i].i]);
             }
         }
         
