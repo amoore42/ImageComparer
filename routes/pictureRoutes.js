@@ -81,16 +81,58 @@ var routes = function(Picture){
         }
     );
     
-    pictureRouter.route('/Picture/:pictureId')
+    pictureRouter.use('/:pictureId', function(req, res, next){
+        Picture.findById(req.params.pictureId, function(err, picture){
+            if(err)
+                res.status(500).send(err);
+            else if(picture){
+                req.picture = picture;
+                next();
+            }else{
+                res.status(404).send('picture not found');
+            }
+        });
+    } );
+    pictureRouter.route('/:pictureId')
         .get(function(req, res){
-            Picture.findById(req.params.pictureId, function(err, picture){
-                if(err)
+            res.json(req.picture);
+        })
+        .put(function(req, res){
+            req.picture.Uri = req.body.Uri;
+            req.picture.UserName = req.body.UserName;
+            req.picture.save(function(err){
+                if(err){
                     res.status(500).send(err);
-                else
-                    res.json(picture);
+                }else{
+                    res.json(req.picture);
+                }
             });
-        }
-    );
+        })
+        .patch(function(req, res){
+            if(req.body._id)
+                delete req.body._id;
+            for(var p in req.body){
+                if(p){
+                    req.pictre[p] = req.body[p];
+                }
+            }
+            req.picture.save(function(err){
+                if(err){
+                    res.status(500).send(err);
+                }else{
+                    res.json(req.picture);
+                }
+            });
+        })
+        .delete(function(req, res){
+            req.picture.remove(function(err){
+                if(err){
+                    res.status(500).send(err);
+                }else{
+                    res.status(204).send('removed');
+                }
+            });
+        });
 
     return pictureRouter;
 };
