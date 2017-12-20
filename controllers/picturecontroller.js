@@ -1,49 +1,21 @@
-var pictureController = function(Picture, S3, dataLoader){
+var pictureController = function(Picture, S3, dataManager){
     var post = function(req, res){
+
+        if(!req.body.UserName){
+            res.status(400);
+            res.send('UserName is required');
+        }
+
         //We want to get the image from s3 and then create an image hash
-        var returnValues = new Array();
         var postedPicture = new Picture(req.body);
+
+        dataManager.setPostedPicture(postedPicture);
+
         S3.getImage(postedPicture.Uri, function(hash){
-            var picture = new Picture();
-            picture.Uri = req.body.Uri;
-            picture.Hash = hash;
-            picture.UserName = postedPicture.UserName;
-
-            //Find the hash in the vpTree and close matches
-            var maximumDistance = 0;
-            var matches = dataLoader.getMatches(hash, maximumDistance);
-
-            //Nothing was found
-            if(matches.length == 0){
-                picture.save(function(err){
-                    if(!err){
-                        //reload the tree.  There is no method to just insert a record *yet
-                        dataLoader.loadAllPictures();
-                    }
-                });
-                returnValues.push(picture);
+            dataManager.saveData(hash, function(returnValues){
+                res.status(201);
                 res.json(returnValues);
-            }else{
-
-                //If an exact match is not in the db then add it 
-                var index = matches.indexOf(hash);
-                if(index == -1){
-                    returnValues.push(picture);
-                    picture.save(function(err){
-                        if(!err)
-                            dataLoader.loadAllPictures();
-                    });
-                }
-
-                Picture.find({
-                    'Hash': { $in: matches }
-                }, function(err, docs){
-                     for(var i = 0; i < docs.length; ++i){
-                        returnValues.push(docs[i]);
-                     }
-                     res.json(returnValues);
-                });
-            }
+            })
         });
     }
 

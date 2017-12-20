@@ -1,8 +1,8 @@
 var express = require('express');
 var S3 = require('../ablemodules/S3Module');
-var dataLoader = require("../ablemodules/dataLoader");
 var mongoose = require('mongoose');
 var Picture = require('../models/pictureModel');
+var dataManager = require('../Managers/dataManager');
 
 Array.prototype.contains = function(obj) {
     var i = this.length;
@@ -16,7 +16,7 @@ Array.prototype.contains = function(obj) {
 
 var routes = function(Picture){
     var pictureRouter = express.Router();
-    var pictureController = require('../controllers/picturecontroller')(Picture, S3, dataLoader);
+    var pictureController = require('../Controllers/pictureController')(Picture, S3, dataManager);
     
     pictureRouter.route('/')
         .post(pictureController.post)

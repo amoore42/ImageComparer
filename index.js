@@ -21,9 +21,8 @@ var app = express();
 
 var port = process.env.port || 3000;
 
-//Load all data from mongoose into local structure
-var dataLoader = require('./ablemodules/dataLoader');
-dataLoader.loadAllPictures();
+var dataManager = require('./Managers/dataManager');
+dataManager.loadAllPictures();
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
