@@ -9,7 +9,7 @@ AWS.config.update({
 });
 
 var S3 = function(){
-    var JIMP = require('./jimpModule');
+    var JIMP = require('./jimpManager');
     var s3 = new AWS.S3();
     var s3Params = {
         Bucket: 'twt-product-images-usstandard',

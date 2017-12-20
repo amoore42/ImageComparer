@@ -1,8 +1,8 @@
 var express = require('express');
-var S3 = require('../ablemodules/S3Module');
 var mongoose = require('mongoose');
 var Picture = require('../models/pictureModel');
 var dataManager = require('../Managers/dataManager');
+var S3 = require('../Managers/s3Manager');
 
 Array.prototype.contains = function(obj) {
     var i = this.length;
