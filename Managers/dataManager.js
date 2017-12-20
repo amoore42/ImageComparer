@@ -27,7 +27,7 @@ var dataManager = function(postedPicture){
             picture.save(function(err){
                 if(!err){
                     //reload the tree.  There is no method to just insert a record *yet
-                    this.loadAllPictures();
+                    loadAllPictures();
                 }
             });
             returnValues.push(picture);
@@ -40,7 +40,7 @@ var dataManager = function(postedPicture){
                 returnValues.push(picture);
                 picture.save(function(err){
                     if(!err)
-                        this.loadAllPictures();
+                        loadAllPictures();
                 });
             }
 
@@ -55,35 +55,29 @@ var dataManager = function(postedPicture){
         }
     };
 
-    var loadAllPictures = function(callback){
-        Picture.find(function(err, picture){
-            if(err)
-               console.log('error getting pictures');
-            else{
-                var hasharray = new Array();
-                for(var i = 0; i < picture.length; i++){
-                    hasharray.push(picture[i].Hash);
-                }
-                //Looks like we have to re-create the tree each time a new picture is
-                //added.  There is no insert method.
-                vptreehash = vpTree.build(hasharray, leven.getEditDistance, 0);
-                vpTreeData = vptreehash;
-                
-                //Convert json picture data into array of pictures
-                console.log(picture);
-            }
+    var loadAllPictures = function(){
+
+        var stepValue = 100;
+        var allResults = new Array();
+        Picture.findPaged({}, 'Hash', {step: stepValue}, function(results){
+            for(var i = 0; i < stepValue; ++i)
+                allResults.push(results[i].Hash);
+            return Promise.resolve();
+        }).then(function(){
+            //Looks like we have to re-create the tree each time a new picture is
+            //added.  There is no insert method.
+            vpTreeData = vpTree.build(allResults, leven.getEditDistance, 0);
         });
     };
 
     var getMatches = function(hash, maximumDistance){
         //The two signifies the number of closest elements.  5 is the distance/tolerance
-        var searchResult = vptreehash.search(hash, 2, 5);
+        var searchResult = vpTreeData.search(hash, 2, 5);
         var result = new Array();
 
-        
         for(var i = 0; i < searchResult.length; ++i){
             if(searchResult[i].d <= maximumDistance){
-                result.push(vptreehash.S[searchResult[i].i]);
+                result.push(vpTreeData.S[searchResult[i].i]);
             }
         }
         
