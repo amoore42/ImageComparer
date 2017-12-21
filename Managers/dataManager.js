@@ -85,7 +85,8 @@ var dataManager = function(postedPicture){
             }
         }
 
-        //Now let's search items in the array and add them as well
+        //Now let's search items in the array and add them as well. Searching this list will be much lower than the tree so
+        //we need to keep the length small.
         for(var i = 0; i < preTreeArray.length; ++i){
             var distance = leven.getEditDistance(hash, preTreeArray[i]);
             if(distance <= HASH_DISTANCE)
